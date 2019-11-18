@@ -300,25 +300,36 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               width: 90,
               height: 90,
-              child: PieChart(PieChartData(
-                borderData: FlBorderData(show: false),
-                centerSpaceRadius: 20,
-                startDegreeOffset: 180,
-                sections: [
-                  PieChartSectionData(
-                      value: 25,
-                      color: Colors.grey,
-                      showTitle: false,
-                      radius: 5),
-                  PieChartSectionData(
-                    value: 75,
-                    color: Colors.green,
-                    title: '75%',
-                    radius: 10,
-                    showTitle: false,
+              child: Stack(
+                children: <Widget>[
+                  Center(
+                      child: Text(
+                    '75%',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  PieChart(
+                    PieChartData(
+                      borderData: FlBorderData(show: false),
+                      centerSpaceRadius: 20,
+                      startDegreeOffset: 180,
+                      sections: [
+                        PieChartSectionData(
+                            value: 25,
+                            color: Colors.grey,
+                            showTitle: false,
+                            radius: 5),
+                        PieChartSectionData(
+                          value: 75,
+                          color: Colors.green,
+                          title: '75%',
+                          radius: 20,
+                          showTitle: false,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              )),
+              ),
             ),
             Text(
               'Remaining Time',
