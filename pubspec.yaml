@@ -25,6 +25,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   flutter_platform_widgets: ^0.20.2
   webview_flutter: ^0.3.15+1
+  fl_chart: ^0.4.2
+  flutter_local_notifications: ^0.8.4+2
 
 dev_dependencies:
   flutter_test:

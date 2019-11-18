@@ -1,8 +1,13 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() => runApp(MyApp());
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -10,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformApp(
       title: 'GridSmartr',
-      home: MyHomePage(title: 'Charge Status'),
+      home: MyHomePage(title: 'Home'),
     );
   }
 }
@@ -34,6 +39,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  showNotification() async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'repeating channel id',
+        'repeating channel name',
+        'repeating description');
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.periodicallyShow(0, 'repeating title',
+        'repeating body', RepeatInterval.EveryMinute, platformChannelSpecifics);
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -49,12 +66,50 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Container(
-        child: WebView(
-          initialUrl: Uri.dataFromString(
-                  '<iframe width="400" height="400" src="https://xyz.here.com/viewer/?project_id=348ec274-36f6-4a96-b121-6b6af803e87a" frameborder="0"></iframe>',
-                  mimeType: 'text/html')
-              .toString(),
-          javascriptMode: JavascriptMode.unrestricted,
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Charge Status',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Container(
+              width: 150,
+              height: 150,
+              child: PieChart(PieChartData(
+                borderData: FlBorderData(show: false),
+                centerSpaceRadius: 20,
+                sections: [
+                  PieChartSectionData(
+                    value: 75,
+                    color: Colors.green,
+                    title: '75%',
+                  ),
+                  PieChartSectionData(
+                      value: 25, color: Colors.grey, showTitle: false)
+                ],
+              )),
+            ),
+            Text(
+              'Remaining Time',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '2:30',
+              style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+            ),
+            Expanded(
+              child: WebView(
+                initialUrl: Uri.dataFromString(
+                        '<iframe width="400" height="400" src="https://xyz.here.com/viewer/?project_id=348ec274-36f6-4a96-b121-6b6af803e87a" frameborder="0"></iframe>',
+                        mimeType: 'text/html')
+                    .toString(),
+                javascriptMode: JavascriptMode.unrestricted,
+              ),
+            ),
+          ],
         ),
       ),
     );
