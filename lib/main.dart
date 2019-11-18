@@ -60,6 +60,28 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return PlatformScaffold(
+      android: (_) => MaterialScaffoldData(
+          drawer: Drawer(
+              child: ListView(
+        children: <Widget>[
+          DrawerHeader(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: AssetImage('assets/portrait.jpg'),
+                  radius: 50,
+                ),
+                Text(
+                  'Tesla Model 3',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+            decoration: BoxDecoration(color: Colors.blue),
+          )
+        ],
+      ))),
       appBar: PlatformAppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
@@ -76,19 +98,25 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Container(
-              width: 150,
-              height: 150,
+              width: 90,
+              height: 90,
               child: PieChart(PieChartData(
                 borderData: FlBorderData(show: false),
                 centerSpaceRadius: 20,
+                startDegreeOffset: 180,
                 sections: [
+                  PieChartSectionData(
+                      value: 25,
+                      color: Colors.grey,
+                      showTitle: false,
+                      radius: 5),
                   PieChartSectionData(
                     value: 75,
                     color: Colors.green,
                     title: '75%',
+                    radius: 10,
+                    showTitle: false,
                   ),
-                  PieChartSectionData(
-                      value: 25, color: Colors.grey, showTitle: false)
                 ],
               )),
             ),
