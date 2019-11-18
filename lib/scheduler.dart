@@ -112,7 +112,7 @@ class _ScheduleState extends State<Schedule> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.8),
+                    padding: const EdgeInsets.all(8.0),
                     child: Card(
                       color: Colors.red,
                       child: Column(
