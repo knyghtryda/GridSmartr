@@ -29,7 +29,13 @@ class _ScheduleState extends State<Schedule> {
                 children: <Widget>[
                   Text("Summer"),
                   Card(
-                    child: Text('Hello'),
+                    child: Text('12am - 7am'),
+                  ),
+                  Card(
+                    child: Text('7am - 7pm'),
+                  ),
+                  Card(
+                    child: Text('7pm - 12am'),
                   ),
                 ],
               ),
@@ -38,6 +44,15 @@ class _ScheduleState extends State<Schedule> {
               child: ListView(
                 children: <Widget>[
                   Text("Winter"),
+                  Card(
+                    child: Text('12am - 7am'),
+                  ),
+                  Card(
+                    child: Text('7am - 7pm'),
+                  ),
+                  Card(
+                    child: Text('7pm - 12am'),
+                  ),
                 ],
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:gridsmartr/animated_count.dart';
 import 'package:gridsmartr/car_settings.dart';
 import 'package:gridsmartr/scheduler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -98,6 +99,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int gridPoints;
+  int _newGridPoints;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _homeScreenText = "Waiting for token...";
 
@@ -205,100 +209,117 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return PlatformScaffold(
+      key: _scaffoldKey,
       android: (_) => MaterialScaffoldData(
           drawer: Drawer(
+              elevation: 8,
               child: ListView(
-        children: <Widget>[
-          DrawerHeader(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundImage: AssetImage('assets/portrait.jpg'),
-                  radius: 50,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Brad\'s',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                children: <Widget>[
+                  DrawerHeader(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        CircleAvatar(
+                          backgroundImage: AssetImage('assets/portrait.jpg'),
+                          radius: 50,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Brad\'s',
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.white),
+                            ),
+                            Text(
+                              'Tesla',
+                              style:
+                                  TextStyle(fontSize: 32, color: Colors.white),
+                            ),
+                            Text(
+                              'Model 3',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            )
+                          ],
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Tesla',
-                      style: TextStyle(fontSize: 32, color: Colors.white),
+                    decoration: BoxDecoration(color: Colors.blue),
+                  ),
+                  ListTile(
+                      leading: Icon(
+                        Icons.stars,
+                        color: Colors.yellow[600],
+                        size: 48,
+                      ),
+                      title: AnimatedCount(
+                        count: gridPoints,
+                        duration: Duration(seconds: 3),
+                        curve: Curves.easeInOutCubic,
+                        style: TextStyle(fontSize: 36, color: Colors.green),
+                      ),
+                      subtitle: Text(
+                        'GridPoints',
+                      ),
+                      onTap: () {
+                        setState(() {
+                          gridPoints = gridPoints + 100;
+                        });
+                      }),
+                  ListTile(
+                    leading: Icon(
+                      Icons.power,
+                      size: 48,
                     ),
-                    Text(
-                      'Model 3',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    )
-                  ],
-                ),
-              ],
-            ),
-            decoration: BoxDecoration(color: Colors.blue),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.stars,
-              color: Colors.yellow[600],
-              size: 48,
-            ),
-            title: Text(
-              gridPoints.toString(),
-              style: TextStyle(fontSize: 36, color: Colors.green),
-            ),
-            subtitle: Text('GridPoints'),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.power,
-              size: 48,
-            ),
-            subtitle: Text('Grid Load Status'),
-            title: Text(
-              'HIGH',
-              style: TextStyle(
-                  color: Colors.red, fontSize: 36, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(
-              Icons.pin_drop,
-              size: 48,
-            ),
-            title: Text('Los Angeles Convention Center'),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(
-              Icons.directions_car,
-              size: 48,
-            ),
-            title: Text('Car Settings'),
-            onTap: () => Navigator.push(
-                context,
-                platformPageRoute(
-                    context: context, builder: (context) => CarSettings())),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.calendar_view_day,
-              size: 48,
-            ),
-            title: Text('Scheduler'),
-            onTap: () => Navigator.push(
-                context,
-                platformPageRoute(
-                    context: context, builder: (context) => Schedule())),
-          ),
-          PlatformButton(
-            child: Text('Draw Notification'),
-            onPressed: () => showNotification(),
-          ),
-        ],
-      ))),
+                    subtitle: Text('Grid Load Status'),
+                    title: Text(
+                      'HIGH',
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.pin_drop,
+                      size: 48,
+                    ),
+                    title: Text('Los Angeles Convention Center'),
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(
+                      Icons.directions_car,
+                      size: 48,
+                    ),
+                    title: Text('Car Settings'),
+                    onTap: () => Navigator.push(
+                        context,
+                        platformPageRoute(
+                            context: context,
+                            builder: (context) => CarSettings())),
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.calendar_view_day,
+                      size: 48,
+                    ),
+                    title: Text('Scheduler'),
+                    onTap: () => Navigator.push(
+                        context,
+                        platformPageRoute(
+                            context: context,
+                            builder: (context) => Schedule())),
+                  ),
+                  PlatformButton(
+                    child: Text('Draw Notification'),
+                    onPressed: () => showNotification(),
+                  ),
+                ],
+              ))),
       appBar: PlatformAppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
@@ -355,6 +376,30 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '2:30',
               style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+            ),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.stars,
+                    color: Colors.yellow[600],
+                    size: 48,
+                  ),
+                  AnimatedCount(
+                    count: gridPoints,
+                    duration: Duration(seconds: 1),
+                    style: TextStyle(fontSize: 36, color: Colors.green),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'GridPoints',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: WebView(
