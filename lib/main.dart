@@ -1,10 +1,50 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+class Item {
+  Item({this.itemId});
+  final String itemId;
+
+  StreamController<Item> _controller = StreamController<Item>.broadcast();
+  Stream<Item> get onChanged => _controller.stream;
+
+  String _status;
+  String get status => _status;
+  set status(String value) {
+    _status = value;
+    _controller.add(this);
+  }
+
+  /*
+  static final Map<String, Route<void>> routes = <String, Route<void>>{};
+  Route<void> get route {
+    final String routeName = '/detail/$itemId';
+    return routes.putIfAbsent(
+      routeName,
+          () => MaterialPageRoute<void>(
+        settings: RouteSettings(name: routeName),
+        builder: (BuildContext context) => DetailPage(itemId),
+      ),
+    );
+  }
+
+   */
+}
+
+final Map<String, Item> _items = <String, Item>{};
+Item _itemForMessage(Map<String, dynamic> message) {
+  final dynamic data = message['data'] ?? message;
+  final String itemId = data['id'];
+  final Item item = _items.putIfAbsent(itemId, () => Item(itemId: itemId))
+    ..status = data['status'];
+  return item;
+}
 
 void main() async {
   var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
@@ -55,6 +95,86 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int gridPoints;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _homeScreenText = "Waiting for token...";
+
+  void _showItemDialog(Map<String, dynamic> message) {
+    showPlatformDialog<bool>(
+      context: context,
+      builder: (_) => _buildDialog(context, _itemForMessage(message)),
+    ).then((value) {
+      if (value) {
+        setState(() {
+          gridPoints = gridPoints + 100;
+        });
+      }
+    });
+  }
+
+  Widget _buildDialog(BuildContext context, Item item) {
+    return PlatformAlertDialog(
+      title: Icon(
+        Icons.error,
+        size: 64,
+        color: Colors.red,
+      ),
+      content: Text(
+        'The power grid in your area is heavily loaded!  '
+        'We are delaying the charging of your Tesla for the next 30 minutes. '
+        'You will receive 100 GridPoints for accepting.',
+        style: TextStyle(fontSize: 18),
+      ),
+      actions: <Widget>[
+        PlatformDialogAction(
+          child: const Text('Accept'),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+        PlatformDialogAction(
+          child: const Text('Deny'),
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+        ),
+      ],
+    );
+  }
+
+  @override
+  initState() {
+    super.initState();
+    gridPoints = 500;
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        _showItemDialog(message);
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        //_navigateToItemDetail(message);
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        //_navigateToItemDetail(message);
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      setState(() {
+        _homeScreenText = "Push Messaging token: $token";
+      });
+      print(_homeScreenText);
+    });
+  }
+
   showNotification() async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'your channel id', 'your channel name', 'your channel description',
@@ -118,16 +238,29 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             leading: Icon(
+              Icons.stars,
+              color: Colors.yellow[600],
+              size: 48,
+            ),
+            title: Text(
+              gridPoints.toString(),
+              style: TextStyle(fontSize: 36, color: Colors.green),
+            ),
+            subtitle: Text('GridPoints'),
+          ),
+          ListTile(
+            leading: Icon(
               Icons.power,
               size: 48,
             ),
-            subtitle: Text('Grid Status'),
+            subtitle: Text('Grid Load Status'),
             title: Text(
               'HIGH',
               style: TextStyle(
                   color: Colors.red, fontSize: 36, fontWeight: FontWeight.bold),
             ),
           ),
+          Divider(),
           ListTile(
             leading: Icon(
               Icons.pin_drop,
@@ -135,6 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             title: Text('Los Angeles Convention Center'),
           ),
+          Divider(),
           ListTile(
             leading: Icon(
               Icons.directions_car,
