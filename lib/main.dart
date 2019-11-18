@@ -1,16 +1,32 @@
+import 'dart:async';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+  var initializationSettingsIOS = IOSInitializationSettings();
+  var initializationSettings = InitializationSettings(
+      initializationSettingsAndroid, initializationSettingsIOS);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: ' + payload);
+    }
+    selectNotificationController.add(payload);
+  });
+  runApp(MyApp());
+}
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+final StreamController<String> selectNotificationController =
+    StreamController<String>();
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return PlatformApp(
@@ -40,15 +56,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   showNotification() async {
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        'repeating channel id',
-        'repeating channel name',
-        'repeating description');
-    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics = new NotificationDetails(
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ticker: 'ticker',
+        enableLights: true);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.periodicallyShow(0, 'repeating title',
-        'repeating body', RepeatInterval.EveryMinute, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+        0,
+        'Charge Modification',
+        'There is high power use in your area. '
+            'Your charging will be shifted 30 mintues to ease the load.',
+        platformChannelSpecifics,
+        payload: 'item x');
   }
 
   @override
@@ -72,14 +95,57 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundImage: AssetImage('assets/portrait.jpg'),
                   radius: 50,
                 ),
-                Text(
-                  'Tesla Model 3',
-                  style: TextStyle(fontSize: 18),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Brad\'s',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                    Text(
+                      'Tesla',
+                      style: TextStyle(fontSize: 32, color: Colors.white),
+                    ),
+                    Text(
+                      'Model 3',
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    )
+                  ],
                 ),
               ],
             ),
             decoration: BoxDecoration(color: Colors.blue),
-          )
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.power,
+              size: 48,
+            ),
+            subtitle: Text('Grid Status'),
+            title: Text(
+              'HIGH',
+              style: TextStyle(
+                  color: Colors.red, fontSize: 36, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.pin_drop,
+              size: 48,
+            ),
+            title: Text('Los Angeles Convention Center'),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.directions_car,
+              size: 48,
+            ),
+            title: Text('Car Settings'),
+          ),
+          PlatformButton(
+            child: Text('Draw Notification'),
+            onPressed: () => showNotification(),
+          ),
         ],
       ))),
       appBar: PlatformAppBar(
