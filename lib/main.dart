@@ -4,6 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:gridsmartr/car_settings.dart';
+import 'package:gridsmartr/scheduler.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() async {
@@ -141,6 +143,21 @@ class _MyHomePageState extends State<MyHomePage> {
               size: 48,
             ),
             title: Text('Car Settings'),
+            onTap: () => Navigator.push(
+                context,
+                platformPageRoute(
+                    context: context, builder: (context) => CarSettings())),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.calendar_view_day,
+              size: 48,
+            ),
+            title: Text('Scheduler'),
+            onTap: () => Navigator.push(
+                context,
+                platformPageRoute(
+                    context: context, builder: (context) => Schedule())),
           ),
           PlatformButton(
             child: Text('Draw Notification'),
